@@ -8,7 +8,9 @@ class User < ApplicationRecord
   has_one_attached :profile_image
   has_many :favorites, dependent: :destroy
   has_many :book_comments, dependent: :destroy
-  
+
+  has_many :favorited_books, through: :favorites, source: :book
+
   # フォローをした、されたの関係
   has_many :relationships, class_name: "Relationship", foreign_key: "follower_id", dependent: :destroy
   has_many :reverse_of_relationships, class_name: "Relationship", foreign_key: "followed_id", dependent: :destroy
@@ -17,11 +19,11 @@ class User < ApplicationRecord
   has_many :followings, through: :relationships, source: :followed
   has_many :followers, through: :reverse_of_relationships, source: :follower
 
-  
+
   validates :name, length: { minimum: 2, maximum: 20 }, uniqueness: true
   validates :introduction, length: {maximum: 50}
-  
-  
+
+
   # フォローしたときの処理
   def follow(user_id)
     relationships.create(followed_id: user_id)
@@ -34,7 +36,7 @@ class User < ApplicationRecord
   def following?(user)
     followings.include?(user)
   end
-  
+
   # 検索方法分岐
   def self.looks(search, word)
     if search == "perfect_match"
